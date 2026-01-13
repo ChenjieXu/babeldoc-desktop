@@ -1,0 +1,2 @@
+# 锁定babeldoc版本，避免API变化导致的问题
+babeldoc==0.5.22
