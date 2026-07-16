@@ -85,34 +85,6 @@ uv run --with nuitka python build.py --nuitka
 
 构建结果位于 `dist/`。
 
-## 🚢 发布新版本
-
-GitHub Actions 会在官方托管 runner 上分别构建并测试：
-
-- macOS Apple Silicon (`arm64`)
-- macOS Intel (`x64`)
-- Windows (`x64`)
-- Linux (`x64`)
-- Python wheel
-
-没有 Windows 电脑也可以发布 Windows 版本。先在 Actions 页面手动运行
-`Release` workflow 验证所有平台；手动运行只生成临时 workflow artifacts，不会
-创建正式 Release。
-
-确认通过后推送与应用版本一致的标签即可创建 GitHub Release：
-
-```bash
-git tag -a v0.2.0 -m "BabelDOC Desktop v0.2.0"
-git push origin v0.2.0
-```
-
-正式 Release 会包含版本化的 macOS、Windows、Linux 压缩包、Python wheel 和
-`SHA256SUMS.txt`。完整检查清单见
-[`docs/RELEASING.md`](docs/RELEASING.md)。
-
-> 当前自动构建产物未使用 Apple Developer ID 或 Windows Authenticode 证书签名。
-> macOS 和 Windows 因此可能显示来自未知开发者的安全提示。
-
 ## 🛠️ 开发指南
 
 ### 代码规范

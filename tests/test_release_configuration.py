@@ -41,6 +41,17 @@ class ReleaseConfigurationTests(unittest.TestCase):
         ):
             self.assertIn(required, workflow)
 
+    def test_maintainer_release_steps_stay_out_of_the_readme(self):
+        readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+        release_guide = (PROJECT_ROOT / "docs" / "RELEASING.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertNotIn("发布新版本", readme)
+        self.assertNotIn("git tag -a", readme)
+        self.assertIn("## Publish", release_guide)
+        self.assertIn("git tag -a", release_guide)
+
 
 if __name__ == "__main__":
     unittest.main()
