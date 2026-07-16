@@ -2,6 +2,7 @@ import time
 import asyncio
 import threading
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from PySide6.QtCore import QObject, Signal
@@ -30,10 +31,12 @@ class TranslationRequestMappingTests(unittest.TestCase):
             model_name="main-model",
             api_key="main-key",
         )
+        source_dir = Path("tmp") / "babeldoc-source"
+        source_file = source_dir / "input.pdf"
         file = UploadedFile(
             id="f",
             name="input.pdf",
-            path="/tmp/babeldoc-source/input.pdf",
+            path=str(source_file),
             size=1,
         )
 
@@ -44,7 +47,7 @@ class TranslationRequestMappingTests(unittest.TestCase):
             runtime=RuntimeOverrides(lang_in="en", lang_out="zh", pages=None, qps=4),
         )
 
-        self.assertEqual(request.output_dir, "/tmp/babeldoc-source")
+        self.assertEqual(Path(request.output_dir), source_dir.absolute())
 
     def test_request_rejects_configuration_without_pdf_output(self):
         with self.assertRaisesRegex(ValueError, "至少需要启用一种"):
@@ -59,6 +62,8 @@ class TranslationRequestMappingTests(unittest.TestCase):
             )
 
     def test_runtime_controls_and_advanced_settings_reach_request(self):
+        output_dir = str(Path("tmp") / "out")
+        working_dir = str(Path("tmp") / "work")
         settings = Settings(
             translation=TranslationSettings(
                 lang_in="en",
@@ -101,8 +106,8 @@ class TranslationRequestMappingTests(unittest.TestCase):
                 merge_alternating_line_numbers=True,
             ),
             paths=PathSettings(
-                output_dir="/tmp/out",
-                working_dir="/tmp/work",
+                output_dir=output_dir,
+                working_dir=working_dir,
                 glossary_files="/tmp/a.csv,/tmp/b.csv",
             ),
             rpc=RPCSettings(doclayout_host="http://layout:8000"),
@@ -147,8 +152,8 @@ class TranslationRequestMappingTests(unittest.TestCase):
         self.assertEqual((request.lang_in, request.lang_out), ("ja", "de"))
         self.assertEqual(request.pages, "1-5")
         self.assertEqual(request.qps, 19)
-        self.assertEqual(request.output_dir, "/tmp/out")
-        self.assertEqual(request.working_dir, "/tmp/work")
+        self.assertEqual(request.output_dir, output_dir)
+        self.assertEqual(request.working_dir, working_dir)
         self.assertEqual(request.glossary_files, "/tmp/task.csv")
         self.assertTrue(request.output_dual)
         self.assertFalse(request.output_mono)
