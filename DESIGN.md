@@ -4,7 +4,7 @@
 
 - Status: Active
 - Last refreshed: 2026-07-17
-- Primary product surfaces: main translation workspace, settings dialog, progress and result states
+- Primary product surfaces: main translation workspace, settings dialog, progress and result states, GitHub README and Read the Docs site
 - Evidence reviewed:
   - `README.md`
   - `src/models/settings.py`
@@ -12,13 +12,17 @@
   - `src/ui/widgets/*.py`
   - `src/ui/widgets/tabs/*.py`
   - `src/ui/styles/modern.qss`
+  - `docs/assets/app-overview.png`
+  - `docs/assets/settings-overview.png`
+  - `mkdocs.yml`
+  - `.readthedocs.yaml`
   - Immersive Translate BabelDOC option screenshots supplied by the user
   - CC Switch main-window screenshot and interface guide
 
 ## Brand
 
 - Personality: calm, precise, capable, desktop-native, research-friendly
-- Trust signals: explicit selected model, clear output choices, visible task state, local configuration ownership
+- Trust signals: explicit selected model, clear output choices, visible task state, local configuration ownership, reproducible builds, release status and maintained documentation
 - Avoid: oversized empty panels, decorative gradients, emoji-dependent iconography, dense walls of switches, hidden billing-impacting options
 
 ## Product goals
@@ -28,6 +32,7 @@
   - Keep cost/output-affecting task choices visible before translation starts.
   - Keep provider credentials, compatibility and expert tuning out of the daily workflow.
   - Make empty, running, error and completed states understandable without reading logs.
+  - Make the repository landing page explain the product, show the real interface and route users to downloads or task-oriented documentation in one screen.
 - Non-goals:
   - Reproduce every Immersive Translate control on the home page.
   - Expose BabelDOC internals that the pinned library version does not support.
@@ -37,6 +42,7 @@
   - Home page has no more than seven task-level decisions before the primary action.
   - Advanced settings remain reachable in two clicks or fewer.
   - Screenshots pass the visual-verdict threshold of 90.
+  - README exposes live release, build, documentation and license status without showing maintainer-only publishing commands.
 
 ## Personas and jobs
 
@@ -61,6 +67,7 @@
   - Settings / Output: watermark policy, default PDF outputs and bilingual ordering
   - Settings / Processing: OCR, rich text, cleanup, formula, line and font behavior
   - Settings / Advanced: worker pools, RPC layout service and default paths
+  - Documentation: quick start, configuration, translation workflow, troubleshooting, security, development and maintainer release guidance
 - Content hierarchy:
   - Home, always visible: source language, target language, model, page range, output mode, bilingual order, automatic glossary extraction
   - Home, contextual: glossary files, queued files, progress, errors and results
@@ -91,7 +98,7 @@
 - Spacing/layout rhythm: 8 px base grid; 24 px page gutter; 16-20 px card padding; 12-16 px field gaps
 - Shape/radius/elevation: 12-14 px cards, 9-10 px inputs, restrained shadow only for primary cards
 - Motion: no decorative motion; immediate state changes; progress animation delegated to native Qt
-- Imagery/iconography: simple text or vector-like symbols; avoid emoji whose rendering changes by platform
+- Imagery/iconography: simple vector-like symbols and real sanitized product screenshots; avoid emoji whose rendering changes by platform and decorative device mockups that obscure the interface
 
 ## Components
 
@@ -131,7 +138,7 @@
 
 ## Content voice
 
-- Tone: concise, calm, operational
+- Tone: concise, calm, operational and credible; lead with user outcomes before implementation details
 - Terminology: use “模型”, “双语 PDF”, “单语 PDF”, “页面范围”, “兼容模式” consistently
 - Microcopy rules: state consequence before implementation detail; avoid “专家” wording unless the control can break output
 
@@ -141,6 +148,7 @@
 - Design-token constraints: reuse object names and QSS selectors before adding inline styles
 - Performance constraints: no image-heavy background, animation loop or network request for presentation
 - Compatibility constraints: macOS, Windows and Linux; avoid platform-specific emoji/icon assumptions
+- Documentation constraints: README remains user-facing; maintainer release commands stay in `docs/RELEASING.md`; Read the Docs builds from versioned `.readthedocs.yaml` and pinned documentation requirements
 - Test/screenshot expectations:
   - Offscreen main-window and settings screenshots at 1400×900 and 1000×700
   - Existing unit tests remain green

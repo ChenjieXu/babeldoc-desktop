@@ -26,17 +26,6 @@ QWidget#app_header {
     border-bottom: 1px solid #E3E6EC;
 }
 
-QFrame#brand_mark {
-    background-color: #1677FF;
-    border-radius: 10px;
-}
-
-QLabel#brand_mark_text {
-    color: #FFFFFF;
-    font-size: 20px;
-    font-weight: 800;
-}
-
 QLabel#header_title {
     color: #16181D;
     font-size: 17px;
