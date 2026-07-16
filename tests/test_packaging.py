@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 import build
+from PIL import Image
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +30,31 @@ class PackagingConfigurationTests(unittest.TestCase):
         self.assertIn("src.*", package_find["include"])
         self.assertTrue(package_find["namespaces"])
         self.assertIn("*.qss", setuptools["package-data"]["src.ui.styles"])
+
+    def test_runtime_uses_the_packaged_application_icon(self):
+        source = (PROJECT_ROOT / "src" / "main.py").read_text(encoding="utf-8")
+
+        self.assertIn("app.setWindowIcon", source)
+        self.assertIn(
+            'get_resource_path("resources/icons/icon.png")',
+            source,
+        )
+
+    def test_application_icons_cover_platform_sizes_and_have_clean_corners(self):
+        icon_dir = PROJECT_ROOT / "resources" / "icons"
+
+        with Image.open(icon_dir / "icon.png") as png_icon:
+            self.assertEqual(png_icon.size, (1024, 1024))
+            self.assertEqual(png_icon.mode, "RGBA")
+            self.assertEqual(png_icon.getpixel((0, 0))[3], 0)
+
+        with Image.open(icon_dir / "icon.ico") as windows_icon:
+            sizes = windows_icon.info["sizes"]
+            self.assertIn((16, 16), sizes)
+            self.assertIn((256, 256), sizes)
+
+        with Image.open(icon_dir / "icon.icns") as macos_icon:
+            self.assertEqual(macos_icon.size, (1024, 1024))
 
     @mock.patch.object(subprocess, "run")
     @mock.patch.object(build, "get_platform_info", return_value=("linux", "x86_64"))

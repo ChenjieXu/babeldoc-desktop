@@ -55,7 +55,9 @@ sys.path.insert(0, str(project_root))
 
 from PySide6.QtWidgets import QApplication, QMessageBox  # noqa: E402
 from PySide6.QtCore import Qt  # noqa: E402
+from PySide6.QtGui import QIcon  # noqa: E402
 from src.app import BabelDocApp  # noqa: E402
+from src.utils.file_utils import get_resource_path  # noqa: E402
 from src.version import __version__  # noqa: E402
 
 
@@ -126,6 +128,9 @@ def main():
         app.setApplicationName("BabelDOC Desktop")
         app.setOrganizationName("BabelDOC")
         app.setApplicationVersion(__version__)
+        app.setWindowIcon(
+            QIcon(str(get_resource_path("resources/icons/icon.png")))
+        )
 
         # 创建主应用
         babeldoc_app = BabelDocApp(app)
