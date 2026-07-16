@@ -1,153 +1,137 @@
 # BabelDOC Desktop
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tauri](https://img.shields.io/badge/Tauri-2.0+-blue)](https://tauri.app/)
-[![Vue](https://img.shields.io/badge/Vue-3.0+-green)](https://vuejs.org/)
-[![Python](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://www.python.org/)
+[![Qt](https://img.shields.io/badge/Qt-PySide6-green)](https://doc.qt.io/qtforpython/)
 
-基于 Tauri + Vue 3 + Python 的 BabelDOC 桌面应用，支持 PDF 文档智能翻译。
+基于 Python + PySide6 (Qt) 的 BabelDOC 桌面应用，支持 PDF 文档智能翻译。
 
 ## ✨ 功能特性
 
-- 🚀 **高性能桌面应用**：基于 Tauri 构建，原生性能体验
-- 📄 **智能 PDF 翻译**：支持多种 PDF 格式的智能翻译
-- 🌍 **多语言支持**：支持中英文等多语言翻译
-- 🤖 **多模型集成**：集成 OpenAI、DeepSeek、智谱、Ollama、Claude 等主流 AI 模型
-- 📝 **灵活输出**：支持双语/单语 PDF 输出
-- 📊 **实时进度**：翻译进度实时显示
-- ⚙️ **设置持久化**：用户设置自动保存
-- 🎨 **现代化 UI**：基于 Vue 3 + TypeScript 的美观界面
+- 🚀 **原生桌面体验**：基于 PySide6 构建，流畅稳定的桌面体验
+- 📄 **智能 PDF 翻译**：集成 BabelDOC 核心，支持高质量文档翻译
+- 🌍 **多语言支持**：支持中英文等多语言互译
+- 🤖 **多模型集成**：支持 OpenAI、DeepSeek、智谱、Ollama 等主流 AI 模型
+- ⚙️ **可视化配置**：简洁直观的设置界面
+- 📊 **实时进度**：翻译任务进度实时监控
 
 ## 🚀 快速开始
 
 ### 系统要求
 
-- **Node.js**: 20.0+
-- **Rust**: 1.70+ (通过 [rustup](https://rustup.rs/) 安装)
-- **Python**: 3.12+
-- **操作系统**: Windows 10+ / macOS 10.15+ / Ubuntu 18.04+
+- **Python**: 3.10+
+- **操作系统**: Windows 10+ / macOS 10.15+ / Ubuntu 20.04+
 
 ### 安装步骤
 
-1. **克隆项目**
+1. **安装 uv** (Python 包管理器)
    ```bash
-   git clone https://github.com/your-username/babeldoc-desktop.git
+   # macOS / Linux
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Windows
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. **克隆项目**
+
+   ```bash
+   git clone <repository-url>
    cd babeldoc-desktop
    ```
 
-2. **安装前端依赖**
+3. **同步环境与依赖**
+   使用 uv 自动创建虚拟环境并安装依赖：
    ```bash
-   npm install
+   uv sync --frozen --extra dev
    ```
 
-3. **安装 Python 后端依赖**
+4. **启动应用**
    ```bash
-   cd python-backend
-   pip install -r requirements.txt
-   cd ..
-   ```
-
-4. **启动开发模式**
-   ```bash
-   npm run tauri dev
+   uv run --frozen --extra dev python run.py
    ```
 
 ## 🏗️ 项目结构
 
-这是一个 **Monorepo** 项目，包含多个子项目：
-
 ```
 babeldoc-desktop/
-├── src/                    # Vue 3 前端源码
-│   ├── components/         # UI 组件
-│   ├── stores/             # Pinia 状态管理
-│   ├── types/              # TypeScript 类型定义
-│   ├── services/           # API 服务封装
-│   └── assets/             # 静态资源
-├── src-tauri/              # Tauri Rust 后端
-│   ├── src/                # Rust 源码
-│   ├── binaries/           # Python sidecar 二进制
-│   └── icons/              # 应用图标
-├── python-backend/         # Python 后端服务
-│   ├── main.py             # 主服务入口
-│   ├── server.py           # HTTP 服务器
-│   └── requirements.txt    # Python 依赖
-├── BabelDOC/               # BabelDOC Python 核心库
-│   ├── babeldoc/           # 核心源码
-│   ├── docs/               # 文档
-│   └── pyproject.toml      # 项目配置
-├── scripts/                # 构建和工具脚本
-│   ├── build-python.sh     # Python 构建脚本
-│   ├── create_icons.py     # 图标生成脚本
-│   └── test_app.py         # 测试脚本
-├── docs/                   # 项目文档
-│   ├── CLAUDE.md           # AI 助手指南
-│   └── TEST_REPORT.md      # 测试报告
-└── examples/               # 示例文件
+├── src/                    # 源代码
+│   ├── ui/                 # PySide6 界面代码
+│   ├── services/           # 业务逻辑服务
+│   ├── models/             # 数据模型
+│   ├── stores/             # 状态管理
+│   ├── utils/              # 工具函数
+│   └── app.py              # 应用入口配置
+├── resources/              # 应用图标等静态资源
+├── tests/                  # unittest 测试
+├── run.py                  # 启动脚本
+├── build.py                # PyInstaller / Nuitka 打包入口
+├── pyproject.toml          # 项目与打包配置
+├── uv.lock                 # uv 锁定环境
+└── requirements.txt        # 项目依赖
 ```
+
+## 📦 打包应用
+
+先按上文安装 `dev` extra，再使用项目打包脚本：
+
+```bash
+# PyInstaller（默认）
+uv run --frozen --extra dev python build.py
+
+# Nuitka（可选，Nuitka 不在项目锁定环境中）
+uv run --with nuitka python build.py --nuitka
+```
+
+构建结果位于 `dist/`。
+
+## 🚢 发布新版本
+
+GitHub Actions 会在官方托管 runner 上分别构建并测试：
+
+- macOS Apple Silicon (`arm64`)
+- macOS Intel (`x64`)
+- Windows (`x64`)
+- Linux (`x64`)
+- Python wheel
+
+没有 Windows 电脑也可以发布 Windows 版本。先在 Actions 页面手动运行
+`Release` workflow 验证所有平台；手动运行只生成临时 workflow artifacts，不会
+创建正式 Release。
+
+确认通过后推送与应用版本一致的标签即可创建 GitHub Release：
+
+```bash
+git tag -a v0.2.0 -m "BabelDOC Desktop v0.2.0"
+git push origin v0.2.0
+```
+
+正式 Release 会包含版本化的 macOS、Windows、Linux 压缩包、Python wheel 和
+`SHA256SUMS.txt`。完整检查清单见
+[`docs/RELEASING.md`](docs/RELEASING.md)。
+
+> 当前自动构建产物未使用 Apple Developer ID 或 Windows Authenticode 证书签名。
+> macOS 和 Windows 因此可能显示来自未知开发者的安全提示。
 
 ## 🛠️ 开发指南
 
-### 开发环境设置
-
-```bash
-# 安装所有依赖
-npm install
-
-# Python 环境
-cd python-backend && pip install -r requirements.txt && cd ..
-
-# 启动开发服务器
-npm run tauri dev
-```
-
-### 构建应用
-
-```bash
-# 构建 Python sidecar
-./scripts/build-python.sh
-
-# 构建桌面应用
-npm run tauri build
-```
-
-### 发布新版本
-
-项目使用 GitHub Actions 自动构建和发布：
-
-1. **创建标签**：推送版本标签触发自动构建
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-
-2. **自动构建**：GitHub Actions 会自动在以下平台构建：
-   - macOS (Intel + Apple Silicon)
-   - Windows
-   - Linux (Ubuntu)
-
-3. **自动发布**：构建完成后自动创建 GitHub Release 并上传安装包
-
-支持的安装包格式：
-- **macOS**: `.dmg`, `.pkg`
-- **Windows**: `.msi`, `.exe`
-- **Linux**: `.deb`, `.rpm`, `.AppImage`
-
 ### 代码规范
 
-- **前端**: 使用 ESLint + Prettier
-- **后端**: 遵循 PEP 8 规范
-- **Rust**: 使用 rustfmt + clippy
+- **Python**: 遵循 PEP 8 规范
 
 ### 测试
 
 ```bash
-# 运行前端测试
-npm test
-
 # 运行 Python 测试
-cd BabelDOC && python -m pytest && cd ..
+uv run --frozen python -m unittest discover -s tests -p "test_*.py" -v
+
+# 构建 wheel
+uv build --wheel --out-dir wheelhouse --clear
 ```
+
+## 🔐 安全说明
+
+API 密钥保存在当前用户的 `settings.json` 中，而不是由系统钥匙串托管。POSIX 系统会将设置文件和目录权限分别收紧为 `0600` 和 `0700`；仍应保护好用户账户、配置目录和备份。
 
 ## 🤝 贡献指南
 
@@ -168,20 +152,12 @@ cd BabelDOC && python -m pytest && cd ..
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目采用 AGPL-3.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 🙏 致谢
 
-- [Tauri](https://tauri.app/) - 现代桌面应用框架
-- [Vue.js](https://vuejs.org/) - 渐进式前端框架
+- [PySide6](https://doc.qt.io/qtforpython/) - Qt for Python
 - [BabelDOC](https://github.com/funstory-ai/BabelDOC) - PDF 翻译核心库
-- [Vite](https://vitejs.dev/) - 快速构建工具
-
-## 📞 联系方式
-
-- 项目主页: [GitHub](https://github.com/your-username/babeldoc-desktop)
-- 问题反馈: [Issues](https://github.com/your-username/babeldoc-desktop/issues)
-- 邮箱: your-email@example.com
 
 ---
 

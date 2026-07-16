@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "babeldoc-desktop"
+version = "0.2.0"
+description = "BabelDOC Desktop - PySide6 版本"
+readme = "README.md"
+license = "AGPL-3.0-only"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.6.0",
+    "babeldoc==0.5.22",
+    "tiktoken>=0.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+babeldoc-desktop = "src.main:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src", "src.*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+"src.ui.styles" = ["*.qss"]

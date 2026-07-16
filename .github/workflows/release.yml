@@ -1,4 +1,4 @@
-name: 'Release'
+name: Release
 
 on:
   push:
@@ -6,80 +6,341 @@ on:
       - 'v*'
   workflow_dispatch:
 
-jobs:
-  release-tauri:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: 'macos-latest'
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest'
-            args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04'
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
+permissions:
+  contents: read
 
-    runs-on: ${{ matrix.platform }}
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  verify:
+    name: Verify source and wheel
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: lts/*
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.11.16'
+          enable-cache: true
+
+      - name: Sync locked environment
+        run: uv sync --frozen --extra dev
+
+      - name: Validate release version
+        shell: bash
+        run: |
+          uv run --frozen python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+
+          from src.version import __version__
+
+          with Path('pyproject.toml').open('rb') as file_handle:
+              project_version = tomllib.load(file_handle)['project']['version']
+          if project_version != __version__:
+              raise SystemExit(
+                  f'version mismatch: pyproject={project_version}, runtime={__version__}'
+              )
+
+          if os.environ.get('GITHUB_REF_TYPE') == 'tag':
+              expected_tag = f'v{__version__}'
+              actual_tag = os.environ['GITHUB_REF_NAME']
+              if actual_tag != expected_tag:
+                  raise SystemExit(
+                      f'tag/version mismatch: {actual_tag} != {expected_tag}'
+                  )
+          PY
+
+      - name: Run tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: uv run --frozen python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Build wheel
+        run: uv build --wheel --out-dir wheelhouse --clear
+
+      - name: Verify installed wheel
+        shell: bash
+        run: |
+          wheels=(wheelhouse/*.whl)
+          test "${#wheels[@]}" -eq 1
+          uv venv .wheel-smoke --python "${PYTHON_VERSION}"
+          uv pip install --python .wheel-smoke/bin/python --no-deps "${wheels[0]}"
+          wheel_python="$PWD/.wheel-smoke/bin/python"
+          smoke_dir="$(mktemp -d)"
+          cd "$smoke_dir"
+          "$wheel_python" - <<'PY'
+          from importlib import metadata, resources
+
+          import src
+          import src.models
+          import src.services
+          import src.stores
+          import src.ui
+          import src.utils
+          from src.version import __version__
+
+          distribution = metadata.distribution('babeldoc-desktop')
+          if distribution.version != __version__:
+              raise SystemExit(
+                  f'wheel version mismatch: {distribution.version} != {__version__}'
+              )
+          installed = {str(path) for path in distribution.files or []}
+          required = {
+              'src/services/translation_service.py',
+              'src/ui/widgets/tabs/translation_tab.py',
+              'src/ui/styles/modern.qss',
+              'src/version.py',
+          }
+          missing = sorted(required - installed)
+          if missing:
+              raise SystemExit(f'wheel is missing required files: {missing}')
+
+          entry_points = {
+              entry.name: entry.value
+              for entry in distribution.entry_points
+              if entry.group == 'console_scripts'
+          }
+          if entry_points.get('babeldoc-desktop') != 'src.main:main':
+              raise SystemExit(f'invalid console entry point: {entry_points}')
+          if not resources.files('src.ui.styles').joinpath('modern.qss').is_file():
+              raise SystemExit('installed stylesheet is unavailable')
+          PY
+
+      - name: Upload Python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: BabelDOC-python-wheel
+          path: wheelhouse/*.whl
+          if-no-files-found: error
+          retention-days: 14
+
+  build:
+    name: Build ${{ matrix.asset_suffix }}
+    needs: verify
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-15
+            os_name: macos
+            expected_machine: arm64
+            asset_suffix: macos-arm64
+          - platform: macos-15-intel
+            os_name: macos
+            expected_machine: x86_64
+            asset_suffix: macos-x64
+          - platform: ubuntu-22.04
+            os_name: linux
+            expected_machine: x86_64
+            asset_suffix: linux-x64
+          - platform: windows-latest
+            os_name: windows
+            expected_machine: amd64
+            asset_suffix: windows-x64
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Verify runner architecture
+        shell: bash
+        run: |
+          python - <<'PY'
+          import platform
+
+          actual = platform.machine().lower()
+          expected = '${{ matrix.expected_machine }}'
+          if actual != expected:
+              raise SystemExit(f'runner architecture mismatch: {actual} != {expected}')
+          PY
 
       - name: Install uv
-        run: pip install uv
-
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          version: '0.11.16'
+          enable-cache: true
+          cache-suffix: ${{ matrix.asset_suffix }}
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install frontend dependencies
-        run: npm ci
-
-      - name: Install Python dependencies
+      - name: Install Linux GUI libraries
+        if: matrix.os_name == 'linux'
         run: |
-          cd python-backend
-          uv pip install -r requirements.txt
-          cd ..
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxcb-xinerama0 \
+            libxcb-cursor0 \
+            libxkbcommon0 \
+            libxkbcommon-x11-0 \
+            libegl1 \
+            libgl1-mesa-glx \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0
 
-      - name: Build Python sidecar
-        run: |
-          chmod +x scripts/build-python.sh
-          ./scripts/build-python.sh
-        shell: bash
+      - name: Sync locked environment
+        run: uv sync --frozen --extra dev
 
-      - name: Build and release
-        uses: tauri-apps/tauri-action@v0
+      - name: Run platform regression tests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QT_QPA_PLATFORM: offscreen
+        run: uv run --frozen python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Build with PyInstaller
+        run: uv run --frozen --extra dev python build.py
+
+      - name: Verify macOS bundle metadata and signature
+        if: matrix.os_name == 'macos'
+        shell: bash
+        run: |
+          expected_version="$(uv run --frozen python -c 'from src.version import __version__; print(__version__)')"
+          test "$(plutil -extract CFBundleShortVersionString raw dist/BabelDOC.app/Contents/Info.plist)" = "$expected_version"
+          test "$(plutil -extract CFBundleIdentifier raw dist/BabelDOC.app/Contents/Info.plist)" = 'com.babeldoc.desktop'
+          codesign --verify --deep --strict dist/BabelDOC.app
+
+      - name: Smoke packaged app (macOS/Linux)
+        if: matrix.os_name != 'windows'
+        shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          if [[ '${{ matrix.os_name }}' == 'macos' ]]; then
+            binary='dist/BabelDOC.app/Contents/MacOS/BabelDOC'
+          else
+            binary='dist/BabelDOC'
+            chmod +x "$binary"
+          fi
+          test -x "$binary"
+          ready_file="$RUNNER_TEMP/babeldoc-smoke-ready"
+          BABELDOC_SMOKE_READY_FILE="$ready_file" \
+            "$binary" --smoke-test > "$RUNNER_TEMP/babeldoc-smoke.log" 2>&1
+          grep -Fx 'BABELDOC_SMOKE_READY' "$ready_file"
+          if grep -E 'Traceback|ImportError|ModuleNotFoundError' "$RUNNER_TEMP/babeldoc-smoke.log"; then
+            exit 1
+          fi
+
+      - name: Smoke packaged app and verify version (Windows)
+        if: matrix.os_name == 'windows'
+        shell: pwsh
+        run: |
+          $env:QT_QPA_PLATFORM = 'offscreen'
+          $readyFile = Join-Path $env:RUNNER_TEMP 'babeldoc-smoke-ready'
+          $env:BABELDOC_SMOKE_READY_FILE = $readyFile
+          $process = Start-Process -FilePath 'dist/BabelDOC.exe' -ArgumentList '--smoke-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Packaged application smoke test failed with code $($process.ExitCode)"
+          }
+          if ((Get-Content $readyFile -Raw).Trim() -ne 'BABELDOC_SMOKE_READY') {
+            throw 'Packaged application emitted an invalid readiness marker'
+          }
+          $expectedVersion = uv run --frozen python -c 'from src.version import __version__; print(__version__)'
+          $actualVersion = (Get-Item 'dist/BabelDOC.exe').VersionInfo.ProductVersion
+          if ($actualVersion -ne $expectedVersion.Trim()) {
+            throw "Windows version mismatch: $actualVersion != $expectedVersion"
+          }
+
+      - name: Package macOS application
+        if: matrix.os_name == 'macos'
+        shell: bash
+        run: |
+          version="$(uv run --frozen python -c 'from src.version import __version__; print(__version__)')"
+          mkdir -p release-assets
+          ditto -c -k --sequesterRsrc --keepParent \
+            dist/BabelDOC.app \
+            "release-assets/BabelDOC-v${version}-${{ matrix.asset_suffix }}.zip"
+
+      - name: Package Linux application
+        if: matrix.os_name == 'linux'
+        shell: bash
+        run: |
+          version="$(uv run --frozen python -c 'from src.version import __version__; print(__version__)')"
+          mkdir -p release-assets
+          chmod +x dist/BabelDOC
+          tar -czf "release-assets/BabelDOC-v${version}-${{ matrix.asset_suffix }}.tar.gz" -C dist BabelDOC
+
+      - name: Package Windows application
+        if: matrix.os_name == 'windows'
+        shell: pwsh
+        run: |
+          $version = (uv run --frozen python -c 'from src.version import __version__; print(__version__)').Trim()
+          New-Item -ItemType Directory -Force -Path 'release-assets' | Out-Null
+          Compress-Archive `
+            -Path 'dist/BabelDOC.exe' `
+            -DestinationPath "release-assets/BabelDOC-v$version-${{ matrix.asset_suffix }}.zip"
+
+      - name: Upload packaged application
+        uses: actions/upload-artifact@v4
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Release ${{ github.ref_name }}'
-          releaseDraft: false
-          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
-          args: ${{ matrix.args }}
-          tauriScript: npm run tauri:build
+          name: BabelDOC-${{ matrix.asset_suffix }}
+          path: release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        shell: bash
+        run: |
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(release-assets/*)
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+            exit 0
+          fi
+
+          prerelease=()
+          if [[ "$GITHUB_REF_NAME" =~ (alpha|beta|rc) ]]; then
+            prerelease+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+            --verify-tag \
+            --generate-notes \
+            --title "BabelDOC $GITHUB_REF_NAME" \
+            "${prerelease[@]}"

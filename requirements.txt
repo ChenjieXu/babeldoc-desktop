@@ -1,0 +1,8 @@
+# PySide6 Desktop Framework
+PySide6>=6.6.0
+
+# BabelDOC Translation Library
+babeldoc==0.5.22
+tiktoken>=0.12.0
+
+# Packaging tools are provided by the optional ``dev`` extra in pyproject.toml.

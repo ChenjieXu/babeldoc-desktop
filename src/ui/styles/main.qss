@@ -1,0 +1,422 @@
+/*
+ * 主样式文件 - 应用全局样式
+ */
+
+/* 导入 Naive UI 风格 */
+@import url("naive_ui.qss");
+
+/* 应用特定样式 */
+
+/* 标题栏 */
+QWidget#title_bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* 侧边栏 */
+QWidget#sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+}
+
+/* 卡片 */
+QWidget#card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* 上传区域 */
+QWidget#upload_area {
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+QWidget#upload_area:hover {
+    border-color: #1890ff;
+    background-color: #f0f8ff;
+}
+
+/* 文件列表项 */
+QWidget#file_item {
+    background-color: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+}
+
+QWidget#file_item:hover {
+    background-color: #f0f0f0;
+}
+
+/* 进度卡片 */
+QWidget#progress_card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* 错误信息 */
+QLabel#error_label {
+    background-color: #fff2f0;
+    border: 1px solid #ffccc7;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #ff4d4f;
+}
+
+/* 成功信息 */
+QLabel#success_label {
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #52c41a;
+}
+
+/* 警告信息 */
+QLabel#warning_label {
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #fa8c16;
+}
+
+/* 信息提示 */
+QLabel#info_label {
+    background-color: #e6f7ff;
+    border: 1px solid #91d5ff;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #1890ff;
+}
+
+/* 日志容器 */
+QWidget#logs_container {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+/* 日志行 */
+QLabel#log_line {
+    color: #666666;
+    padding: 2px 0;
+    word-break: break-all;
+}
+
+/* 结果文件项 */
+QWidget#result_item {
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+    border-radius: 6px;
+}
+
+QWidget#result_item:hover {
+    background-color: #d9f7be;
+}
+
+/* 标签 */
+QLabel#tag {
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+QLabel#tag[variant="default"] {
+    background-color: #f0f0f0;
+    color: #666666;
+}
+
+QLabel#tag[variant="primary"] {
+    background-color: #e6f7ff;
+    color: #1890ff;
+}
+
+QLabel#tag[variant="success"] {
+    background-color: #f6ffed;
+    color: #52c41a;
+}
+
+QLabel#tag[variant="warning"] {
+    background-color: #fffbe6;
+    color: #fa8c16;
+}
+
+QLabel#tag[variant="error"] {
+    background-color: #fff2f0;
+    color: #ff4d4f;
+}
+
+/* 分隔线 */
+QFrame[orientation="horizontal"] {
+    color: #e0e0e0;
+}
+
+QFrame[orientation="vertical"] {
+    color: #e0e0e0;
+}
+
+/* 徽章 */
+QLabel#badge {
+    background-color: #ff4d4f;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* 头像 */
+QLabel#avatar {
+    background-color: #1890ff;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 加载动画 */
+QWidget#loading_spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #1890ff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+}
+
+/* 空状态 */
+QWidget#empty_state {
+    background-color: #fafafa;
+    border-radius: 8px;
+    padding: 40px;
+}
+
+QLabel#empty_icon {
+    color: #d9d9d9;
+    font-size: 48px;
+}
+
+QLabel#empty_text {
+    color: #999999;
+    font-size: 14px;
+}
+
+/* 链接 */
+QLabel#link {
+    color: #1890ff;
+    text-decoration: underline;
+}
+
+QLabel#link:hover {
+    color: #40a9ff;
+}
+
+/* 代码块 */
+QLabel#code_block {
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+/* 引用 */
+QLabel#blockquote {
+    background-color: #f9f9f9;
+    border-left: 4px solid #1890ff;
+    padding: 8px 12px;
+    color: #666666;
+}
+
+/* 分割面板 */
+QSplitter#splitter {
+    background-color: #f5f5f5;
+}
+
+/* 表单标签 */
+QLabel#form_label {
+    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+QLabel#form_label::after {
+    content: ":";
+}
+
+/* 必填标记 */
+QLabel#required_mark {
+    color: #ff4d4f;
+    margin-left: 4px;
+}
+
+/* 帮助文本 */
+QLabel#help_text {
+    color: #999999;
+    font-size: 12px;
+}
+
+/* 验证错误 */
+QLabel#validation_error {
+    color: #ff4d4f;
+    font-size: 12px;
+}
+
+/* 禁用状态 */
+*:disabled {
+    color: #999999;
+    background-color: #f5f5f5;
+}
+
+/* 只读状态 */
+*:read-only {
+    background-color: #fafafa;
+}
+
+/* 焦点状态 */
+*:focus {
+    outline: 2px solid #1890ff;
+    outline-offset: 2px;
+}
+
+/* 悬停状态 */
+/* transition 在 QSS 中不支持，已移除 */
+
+/* 激活状态 */
+/* transform 在 QSS 中不支持，已移除 */
+
+/* 选中状态 */
+*:selected {
+    background-color: #e6f7ff;
+    color: #1890ff;
+}
+
+/* 阴影效果 */
+QWidget[shadow="small"] {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+QWidget[shadow="medium"] {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+QWidget[shadow="large"] {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 圆角 */
+QWidget[rounded="small"] {
+    border-radius: 4px;
+}
+
+QWidget[rounded="medium"] {
+    border-radius: 8px;
+}
+
+QWidget[rounded="large"] {
+    border-radius: 12px;
+}
+
+/* 间距 */
+QWidget[spacing="small"] {
+    spacing: 8px;
+}
+
+QWidget[spacing="medium"] {
+    spacing: 16px;
+}
+
+QWidget[spacing="large"] {
+    spacing: 24px;
+}
+
+/* 内边距 */
+QWidget[padding="small"] {
+    padding: 8px;
+}
+
+QWidget[padding="medium"] {
+    padding: 16px;
+}
+
+QWidget[padding="large"] {
+    padding: 24px;
+}
+
+/* 外边距 */
+QWidget[margin="small"] {
+    margin: 8px;
+}
+
+QWidget[margin="medium"] {
+    margin: 16px;
+}
+
+QWidget[margin="large"] {
+    margin: 24px;
+}
+
+/* 宽度 */
+QWidget[width="small"] {
+    min-width: 120px;
+}
+
+QWidget[width="medium"] {
+    min-width: 240px;
+}
+
+QWidget[width="large"] {
+    min-width: 480px;
+}
+
+QWidget[width="full"] {
+    width: 100%;
+}
+
+/* 高度 */
+QWidget[height="small"] {
+    min-height: 120px;
+}
+
+QWidget[height="medium"] {
+    min-height: 240px;
+}
+
+QWidget[height="large"] {
+    min-height: 480px;
+}
+
+QWidget[height="full"] {
+    height: 100%;
+}
+
+/* 最大宽度 */
+QWidget[max-width="small"] {
+    max-width: 120px;
+}
+
+QWidget[max-width="medium"] {
+    max-width: 240px;
+}
+
+QWidget[max-width="large"] {
+    max-width: 480px;
+}
+
+/* 最大高度 */
+QWidget[max-height="small"] {
+    max-height: 120px;
+}
+
+QWidget[max-height="medium"] {
+    max-height: 240px;
+}
+
+QWidget[max-height="large"] {
+    max-height: 480px;
+}
