@@ -5,12 +5,13 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QLabel
 
 from src.models.settings import ModelConfig, Provider, Settings, create_default_settings
 from src.models.translation import UploadedFile
 from src.services.settings_service import SettingsService
 from src.stores.settings_store import SettingsStore
+from src.ui.widgets.app_header import AppHeader
 from src.ui.widgets.app_sidebar import AppSidebar
 from src.ui.widgets.file_uploader import FileUploader
 from src.ui.widgets.settings_dialog import SettingsDialog
@@ -74,6 +75,14 @@ class SettingsUiRegressionTests(unittest.TestCase):
         self.assertEqual(store.calls["pdf"]["formular_font_pattern"], "")
         self.assertEqual(store.calls["rpc"]["doclayout_host"], "")
         self.assertEqual(store.calls["paths"]["output_dir"], "")
+
+    def test_header_uses_the_real_application_icon(self):
+        header = AppHeader()
+        logo = header.findChild(QLabel, "brand_logo")
+
+        self.assertIsNotNone(logo)
+        self.assertIsNotNone(logo.pixmap())
+        self.assertFalse(logo.pixmap().isNull())
 
     def test_provider_editor_preserves_custom_base_url(self):
         model = ModelConfig(

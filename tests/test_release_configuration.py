@@ -52,6 +52,28 @@ class ReleaseConfigurationTests(unittest.TestCase):
         self.assertIn("## Publish", release_guide)
         self.assertIn("git tag -a", release_guide)
 
+    def test_readthedocs_site_and_product_readme_are_wired_together(self):
+        readme = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+        readthedocs = (PROJECT_ROOT / ".readthedocs.yaml").read_text(
+            encoding="utf-8"
+        )
+        mkdocs = (PROJECT_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+        requirements = (PROJECT_ROOT / "docs" / "requirements.txt").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("version: 2", readthedocs)
+        self.assertIn("configuration: mkdocs.yml", readthedocs)
+        self.assertIn("fail_on_warning: true", readthedocs)
+        self.assertIn("mkdocs-material==", requirements)
+        self.assertIn("docs/assets/app-overview.png", readme)
+        self.assertIn("readthedocs.org/projects/babeldoc-desktop/badge", readme)
+        self.assertIn("模型与设置: configuration.md", mkdocs)
+        self.assertTrue((PROJECT_ROOT / "docs" / "assets" / "logo.png").is_file())
+        self.assertTrue(
+            (PROJECT_ROOT / "docs" / "assets" / "settings-overview.png").is_file()
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

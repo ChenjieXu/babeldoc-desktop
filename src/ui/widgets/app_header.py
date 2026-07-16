@@ -1,8 +1,8 @@
 """Application header for the desktop workspace."""
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
-    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from src.utils.file_utils import get_resource_path
 from src.version import __version__
 
 
@@ -30,16 +31,20 @@ class AppHeader(QWidget):
         layout.setContentsMargins(24, 0, 24, 0)
         layout.setSpacing(14)
 
-        logo_mark = QFrame()
-        logo_mark.setObjectName("brand_mark")
-        logo_mark.setFixedSize(38, 38)
-        logo_layout = QVBoxLayout(logo_mark)
-        logo_layout.setContentsMargins(0, 0, 0, 0)
-        logo_label = QLabel("B")
-        logo_label.setObjectName("brand_mark_text")
+        logo_label = QLabel()
+        logo_label.setObjectName("brand_logo")
+        logo_label.setFixedSize(40, 40)
         logo_label.setAlignment(Qt.AlignCenter)
-        logo_layout.addWidget(logo_label)
-        layout.addWidget(logo_mark)
+        logo = QPixmap(str(get_resource_path("resources/icons/icon.png")))
+        logo_label.setPixmap(
+            logo.scaled(
+                40,
+                40,
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation,
+            )
+        )
+        layout.addWidget(logo_label)
 
         identity = QVBoxLayout()
         identity.setSpacing(1)
